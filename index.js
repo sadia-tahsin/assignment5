@@ -151,12 +151,12 @@ app.delete("/deleteService/:id", async (req, res) => {
     });
 
         // Route to get a single service by ID from the SERVICES collection
-app.get("/services/:id", async (req, res) => {
+app.get("/events/:id", async (req, res) => {
   try {
     const id = req.params.id; // Get the ID parameter from the request
     
     const db = client.db("EVENT_MANAGEMENT");
-    const collection = db.collection("events");
+    const collection = db.collection("EVENTS");
 
     // Fetch the service with the specified ID from the SERVICES collection
     const eventData = await collection.findOne({ _id:new ObjectId(id) });
@@ -166,7 +166,7 @@ app.get("/services/:id", async (req, res) => {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    res.json(serviceData);
+    res.json(eventData);
   } catch (error) {
     console.error("Error fetching data from event collection:", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -187,6 +187,33 @@ app.get("/services/:id", async (req, res) => {
         });
       } catch (error) {
         console.error("Error posting data to EVENTS collection:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+      }
+    });
+    app.put("/updateEvent/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const newData = req.body;
+        console.log(newData)
+        
+        const { _id, ...newObject } = newData
+    
+        const db = client.db("EVENT_MANAGEMENT");
+        const collection = db.collection("EVENTS");
+    
+        // Update the service document with the provided data
+        await collection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: newObject } // Update the document with the provided data
+        );
+    
+        res.status(200).json({
+          success: true,
+          message: "Event document updated successfully",
+        });
+      } catch (error) {
+        console.log(error)
+        console.error("Error updating service document:", error);
         res.status(500).json({ message: "Internal Server Error" });
       }
     });
@@ -211,7 +238,7 @@ app.get("/services/:id", async (req, res) => {
   }
 });
 
-    // Route to get all data from the RECENT_EVENTS collection
+ // Route to get all data from the RECENT_EVENTS collection
 app.get("/recentEvents", async (req, res) => {
   try {
     const db = client.db("EVENT_MANAGEMENT");
